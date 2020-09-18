@@ -11,6 +11,7 @@ namespace HelloWorld
 
     struct Item
     {
+        public string name;
         public int statBoost;
     }
 
@@ -22,6 +23,10 @@ namespace HelloWorld
         private Player _player2;
         private Item _longSword;
         private Item _dagger;
+        private Item _longbow;
+        private Item _greatsword;
+        private Item _mothballs;
+        private Item _thejack;
 
         //Run the game
         public void Run()
@@ -39,8 +44,18 @@ namespace HelloWorld
 
         public void InitializeItems()
         {
+            _longSword.name = "LongSword";
             _longSword.statBoost = 15;
+            _dagger.name = "Dagger";
             _dagger.statBoost = 10;
+            _longbow.name = "LongBow";
+            _longbow.statBoost = 12;
+            _thejack.name = "The Jack";
+            _thejack.statBoost = 40;
+            _greatsword.name = "GreatSword";
+            _greatsword.statBoost = 25;
+            _mothballs.name = "Mothballs";
+            _mothballs.statBoost = 5;
         }
 
         //Displays two options to the player. Outputs the choice of the two options
@@ -65,20 +80,46 @@ namespace HelloWorld
             }
         }
 
+        public void GetInput(out char input, string option1, string option2, string option3, string query)
+        {
+            //Print description to console
+            Console.WriteLine(query);
+            //print options to console
+            Console.WriteLine("1." + option1);
+            Console.WriteLine("2." + option2);
+            Console.WriteLine("3." + option3);
+            Console.Write("> ");
+
+            input = ' ';
+            //loop until valid input is received
+            while (input != '1' && input != '2' && input != '3')
+            {
+                input = Console.ReadKey().KeyChar;
+                if (input != '1' && input != '2' && input != '3')
+                {
+                    Console.WriteLine("Invalid Input");
+                }
+            }
+        }
+
         //Equip items to both players in the beginning of the game
-        public void SelectItem(Player player)
+        public void SelectSet(Player player)
         {
             //Get input for player one
             char input;
-            GetInput(out input, "Longsword", "Dagger", "Welcome! Please choose a weapon.");
+            GetInput(out input, "Set 1", "Set 2", "Welcome! Please choose a set.");
             //Equip item based on input value
             if (input == '1')
             {
-                player.EquipItem(_longSword);
+                player.AddItemToInventory(_longSword, 0);
+                player.AddItemToInventory(_dagger, 1);
+                player.AddItemToInventory(_longbow, 2);
             }
             else if (input == '2')
             {
-                player.EquipItem(_dagger);
+                player.AddItemToInventory(_greatsword, 0);
+                player.AddItemToInventory(_thejack, 1);
+                player.AddItemToInventory(_mothballs, 2);
             }
         }
 
@@ -86,9 +127,14 @@ namespace HelloWorld
         {
             Console.WriteLine("What is your name?");
             string name = Console.ReadLine();
-            Player player = new Player(name, 100, 10);
-            SelectItem(player);
+            Player player = new Player(name, 100, 10, 5);
+            SelectSet(player);
             return player;
+        }
+
+        public void ClassSelect()
+        {
+
         }
 
         public void ClearScreen()
@@ -96,6 +142,46 @@ namespace HelloWorld
             Console.WriteLine("Press any key to continue");
             Console.Write("> ");
             Console.ReadKey();
+            Console.Clear();
+        }
+
+        public void InventoryMenu(Player player)
+        {
+            Item[] inventory = player.GetInventory();
+
+            char input;
+            GetInput(out input, inventory[0].name, inventory[1].name, inventory[2].name, "Select a weapon from your inventory.");
+
+            switch (input)
+            {
+                case '1':
+                    {
+                        player.EquipItem(0);
+                        Console.WriteLine("you equiped " + inventory[0].name);
+                        Console.WriteLine("base damage increased by " + inventory[0].statBoost);
+                        break;
+                    }
+                case '2':
+                    {
+                        player.EquipItem(1);
+                        Console.WriteLine("you equiped " + inventory[1].name);
+                        Console.WriteLine("base damage increased by " + inventory[1].statBoost);
+                        break;
+                    }
+                case '3':
+                    {
+                        player.EquipItem(2);
+                        Console.WriteLine("you equiped " + inventory[2].name);
+                        Console.WriteLine("base damage increased by " + inventory[2].statBoost);
+                        break;
+                    }
+                default:
+                    {
+                        player.UnequipItem();
+                        Console.WriteLine("you equiped hands");
+                        break;
+                    }
+            }
             Console.Clear();
         }
 
@@ -114,7 +200,7 @@ namespace HelloWorld
                 //Player 1 turn start
                 //Get player input
                 char input;
-                GetInput(out input, "Attack", "NO", "Your turn Player 1");
+                GetInput(out input, "Attack", "Change Weapon", "Your turn Player 1");
 
                 if(input == '1')
                 {
@@ -122,10 +208,10 @@ namespace HelloWorld
                 }
                 else
                 {
-                    Console.WriteLine("NO!!!!!");
+                    InventoryMenu(_player1);
                 }
 
-                GetInput(out input, "Attack", "NO", "Your turn Player 2");
+                GetInput(out input, "Attack", "Change Weapon", "Your turn Player 2");
 
                 if (input == '1')
                 {
@@ -133,17 +219,17 @@ namespace HelloWorld
                 }
                 else
                 {
-                    Console.WriteLine("NO!!!!!");
+                    InventoryMenu(_player2);
                 }
                 Console.Clear();
             }
             if(_player1.GetIsAlive())
             {
-                Console.WriteLine("Player 1 wins!!1!1!!11!11?");
+                Console.WriteLine("player " + _player1.GetName() + " wins!");
             }
             else
             {
-                Console.WriteLine("Player 2 wins??????????");
+                Console.WriteLine("player " + _player2.GetName() + " wins!");
             }
             ClearScreen();
             _gameOver = true;

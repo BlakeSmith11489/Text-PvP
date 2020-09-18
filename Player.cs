@@ -8,24 +8,59 @@ namespace HelloWorld
     {
         private string _name;
         private int _health;
-        private int _damage;
+        private int _basedamage;
+        private Item[] _inventory;
+        private Item _currentweapon;
+        private Item _hands;
 
         public Player()
         {
+            _inventory = new Item[3];
             _health = 100;
-            _damage = 10;
+            _basedamage = 10;
+            _hands.name = "Fist-I-Cuffs";
+            _hands.statBoost = 0;
         }
 
-        public Player(string nameVal, int healthVal, int damageVal)
+        public Player(string nameVal, int healthVal, int damageVal, int inventorySize)
         {
             _name = nameVal;
             _health = healthVal;
-            _damage = damageVal;
+            _basedamage = damageVal;
+            _inventory = new Item[inventorySize];
+            _hands.name = "Fist-I-Cuffs";
+            _hands.statBoost = 0;
         }
 
-        public void EquipItem(Item weapon)
+        public Item[] GetInventory()
         {
-            _damage += weapon.statBoost;
+            return _inventory;
+        }
+
+        public void AddItemToInventory(Item item, int index)
+        {
+            _inventory[index] = item;
+        }
+
+        public bool Contains(int itemIndex)
+        {
+            if(itemIndex > 0 && itemIndex < _inventory.Length)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void EquipItem(int itemIndex)
+        {
+            if(Contains(itemIndex) == true)
+            {
+                _currentweapon = _inventory[itemIndex];
+            }
+            else
+            {
+                Console.WriteLine("Invalid");
+            }
         }
         
         public string GetName()
@@ -38,16 +73,32 @@ namespace HelloWorld
             return _health > 0;
         }
 
+        public void UnequipItem()
+        {
+            _currentweapon = _hands;
+        }
+
+        public void RemoveItem(int index)
+        {
+            _inventory[index] = _hands;
+        }
+        public void MoveItem(int from, int to)
+        {
+            _inventory[to] = _inventory[from];
+            RemoveItem(from);
+        }
+
         public void Attack(Player enemy)
         {
-            enemy.TakeDamage(_damage);
+            int totalDamage = _basedamage + _currentweapon.statBoost;
+            enemy.TakeDamage(totalDamage);
         }
 
         public void PrintStats()
         {
             Console.WriteLine("Name: " + _name);
             Console.WriteLine("Health: " + _health);
-            Console.WriteLine("Damage: " + _damage);
+            Console.WriteLine("Damage: " + (_basedamage + _currentweapon.statBoost));
         }
 
         private void TakeDamage(int damageVal)
